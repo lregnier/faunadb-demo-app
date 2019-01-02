@@ -4,8 +4,10 @@
 
 ### Set up Schema
 
+// TODO: add FQL shell script file for setting up the schema
+
 ### Obtain an Admin API Key
-https://app.fauna.com/documentation/howto/crud#obtain-an-admin-api-key
+// TODO: add info for getting an API key. It will be needed for running the app. More on that [here](https://app.fauna.com/documentation/howto/crud#obtain-an-admin-api-key)
 
 ## Runing the app
 
@@ -43,6 +45,7 @@ Content-type: application/json
 ```
 
 ### Create several Posts
+Creates several Posts within a single requests. The Posts will be persisted in a single transaction as well.
 
 __Request__
 
@@ -110,6 +113,8 @@ Content-type: application/json
 ```
 
 ### Retrieve Posts
+Retrieves all existent Posts.
+
 __Request__
 
 ```
@@ -144,6 +149,8 @@ Content-type: application/json
 ```
 
 ### Retrieve Posts by Tags
+Retrieves all the existent Posts matching the given Tags.
+
 ```
 GET /posts?tags=pet,coffee
 ```
@@ -226,7 +233,7 @@ Content-type: application/json
 }
 ```
 
-> INFO: note that although as the 'tags' field has not been provided in the request, it has not been modified.
+> INFO: note that although	 the 'tags' field has not been provided in the request, it has not been modified.
 
 ### Delete a Post
 Deletes an existent Post for the given Id. If the Post cannot be found, a `404 - Not Found` response is returned.
@@ -254,4 +261,4 @@ Content-type: application/json
 
 
 ## FQL Reference
-// TODO as FQL queries
+// TODO: add FQL queries backing API operations
