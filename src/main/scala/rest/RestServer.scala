@@ -1,4 +1,4 @@
-package rest.common
+package rest
 
 import akka.actor.{ActorSystem, CoordinatedShutdown, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import akka.http.scaladsl.Http
