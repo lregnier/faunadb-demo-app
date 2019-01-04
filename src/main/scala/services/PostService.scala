@@ -1,42 +1,37 @@
 package services
 
-import model.{CreateReplacePostData, Post, UpdatePostData}
+import model.{CreateReplacePostData, Post}
 import persistence.PostRepository
 
-import scala.concurrent.{ExecutionContext, Future}
-
-/**
-  * Base trait for implementing Domain Services
-  */
-trait Service {
-  // Note: using Scala's global ExecutionContext for now.
-  // Evaluate the use of a dedicated ExecutionContext for
-  // the services layer (bulkheading) in a prod environment.
-  implicit protected val ec: ExecutionContext = ExecutionContext.global
-}
+import scala.concurrent.Future
 
 class PostService(repository: PostRepository) extends Service {
 
-  def createPost(createUpdateData: CreateReplacePostData): Future[Post] = {
+  def createPost(data: CreateReplacePostData): Future[Post] = {
+    // Build entity
     val postEntity =
       Post(
-        "", // Id will be automatically assigned by the Repository once saved
-        createUpdateData.title,
-        createUpdateData.tags
+        "-1", // Id will be automatically assigned by the Repository once saved
+        data.title,
+        data.tags
       )
+
+    // Save
     repository.save(postEntity)
   }
 
   def createSeveralPosts(createUpdateData: Seq[CreateReplacePostData]): Future[Seq[Post]] = {
+    // Build entities
     val postEntities =
       createUpdateData.map { data =>
         Post(
-          "", // Id will be automatically assigned by the Repository once saved
+          "-1", // Id will be automatically assigned by the Repository once saved
           data.title,
           data.tags
         )
       }
 
+    // Save
     repository.saveAll(postEntities: _*)
   }
 
@@ -46,33 +41,18 @@ class PostService(repository: PostRepository) extends Service {
   def retrievePosts(): Future[Seq[Post]] =
     repository.findAll()
 
-  def retrievePostsByTags(tags: Seq[String]): Future[Seq[Post]] = ???
-
-  def updatePost(id: String, data: UpdatePostData): Future[Option[Post]] = {
-    def update(post: Post): Future[Post] = {
-      val updatedTitle = data.title.getOrElse(post.title)
-      val updatedTags = data.tags.getOrElse(post.tags)
-      repository.save(post.copy(title = updatedTitle, tags = updatedTags))
-    }
-
-    // TODO: move query to repository using FQL
-    val result =
-      retrievePost(id) flatMap {
-        case Some(post) => update(post).map(Some(_))
-        case None       => Future.successful(None)
-      }
-
-    result
-  }
+  def retrievePostsByTitle(title: String): Future[Seq[Post]] =
+    repository.findByTitle(title)
 
   def replacePost(id: String, data: CreateReplacePostData): Future[Option[Post]] = {
-    def update(post: Post): Future[Post] =
-      repository.save(post.copy(title = data.title, tags = data.tags))
+    def replace(post: Post): Future[Post] = {
+      val postEntity = Post(id, data.title, data.tags)
+      repository.save(postEntity)
+    }
 
-    // TODO: move query to repository using FQL
     val result =
       retrievePost(id) flatMap {
-        case Some(post) => update(post).map(Some(_))
+        case Some(post) => replace(post).map(Some(_))
         case None       => Future.successful(None)
       }
 

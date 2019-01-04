@@ -5,28 +5,13 @@ import faunadb.FaunaClient
 import faunadb.errors.NotFoundException
 import faunadb.query.{Class, Obj, _}
 import faunadb.values.{Decoder, _}
+import model.Entity
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
-  * Base trait for implementing Repositories.
-  *
-  * It defines a set of base methods following DDD's
-  * Repository pattern.
-  */
-trait Repository[A] extends {
-  def save(entity: A): Future[A]
-  def saveAll(entities: A*): Future[Seq[A]]
-  def remove(id: String): Future[Option[A]]
-  def find(id: String): Future[Option[A]]
-  def findAll(): Future[Seq[A]]
-}
+trait FaunaRepository[A <: Entity] extends Repository[A] with FaunaRepository.Implicits {
 
-trait FaunaRepository[A] extends Repository[A] {
-
-  import FaunaRepository.Implicits._
-
-  // TODO: using Scala's global ExecutionContext for now.
+  // Note: using Scala's global ExecutionContext for now.
   // Evaluate the use of a a dedicated ExecutionContext for
   // the persistence layer (bulkheading) in a prod environment.
   implicit protected val ec: ExecutionContext = ExecutionContext.global
@@ -39,14 +24,18 @@ trait FaunaRepository[A] extends Repository[A] {
   implicit protected val codec: Codec[A]
 
   override def save(entity: A): Future[A] = {
-    val result: Future[Value] = client.query(saveQuery(entity))
+    val result: Future[Value] = client.query(saveQuery(entity.id, entity))
     result.decode
   }
 
   override def saveAll(entities: A*): Future[Seq[A]] = {
     val result: Future[Value] = client.query(
-      Map(entities, Lambda(nextEntity => saveQuery(nextEntity)))
+      Map(
+        entities,
+        Lambda(nextEntity => saveQuery(Select(Value("id"), nextEntity), nextEntity))
+      )
     )
+
     result.decode[Seq[A]]
   }
 
@@ -71,37 +60,55 @@ trait FaunaRepository[A] extends Repository[A] {
   }
 
   def findAll(): Future[Seq[A]] = {
-    val result =
+    val result: Future[Value] =
       client.query(
-        Match(Index(Value(classIndexName)))
+        Map(
+          SelectAll(
+            Path("data", "id"),
+            Paginate(
+              Match(Index(Value(classIndexName)))
+            )
+          ),
+          Lambda(nextId => Select(Value("data"), Get(Ref(Class(className), nextId))))
+        )
       )
 
     result.decode[Seq[A]]
   }
 
-  protected def saveQuery(entity: Expr): Expr =
+  protected def saveQuery(id: Expr, data: Expr): Expr =
     Select(
       Value("data"),
-      Let(
-        Seq(
-          "id" ->
-            Select(
-              Path("ref", "id"),
-              Create(Class(Value(className)), Obj("data" -> entity))
-            )
-        ),
-        Update(
-          Ref(Class(className), Var("id")),
-          Obj("data" -> Obj("id" -> Var("id")))
-        )
+      If(
+        Exists(Ref(Class(className), id)),
+        replaceQuery(id, data),
+        createQuery(data)
       )
     )
+
+  protected def createQuery(data: Expr): Expr =
+    Let(
+      Seq(
+        "id" ->
+          Select(
+            Path("ref", "id"),
+            Create(Class(Value(className)), Obj("data" -> data))
+          )
+      ),
+      Update(
+        Ref(Class(className), Var("id")),
+        Obj("data" -> Obj("id" -> Var("id")))
+      )
+    )
+
+  protected def replaceQuery(id: Expr, data: Expr): Expr =
+    Replace(Ref(Class(className), id), Obj("data" -> data))
 
 }
 
 object FaunaRepository {
 
-  object Implicits {
+  trait Implicits {
 
     implicit class ExtendedFutureValue(value: Future[Value]) {
       def decode[A: Decoder](implicit ec: ExecutionContext): Future[A] = value.map(_.to[A].get)
@@ -115,6 +122,8 @@ object FaunaRepository {
           }
     }
   }
+
+  object Implicits extends Implicits
 }
 
 class FaunaSettings(config: Config) {

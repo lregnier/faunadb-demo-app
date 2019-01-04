@@ -1,7 +1,5 @@
 package model
 
-case class Post(id: String, title: String, tags: Seq[String])
+case class Post(id: String, title: String, tags: Seq[String]) extends Entity
 
 case class CreateReplacePostData(title: String, tags: Seq[String])
-
-case class UpdatePostData(title: Option[String], tags: Option[Seq[String]])

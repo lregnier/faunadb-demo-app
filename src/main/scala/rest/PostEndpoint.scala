@@ -1,22 +1,9 @@
 package rest
 
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.{Directives, Route}
-import de.heikoseeberger.akkahttpjson4s.Json4sSupport
-import model.{CreateReplacePostData, UpdatePostData}
-import org.json4s.ext.JavaTimeSerializers
-import org.json4s.{DefaultFormats, native}
+import akka.http.scaladsl.server.Route
+import model.CreateReplacePostData
 import services.PostService
-
-/**
-  * Base trait for implementing Rest API endpoints
-  */
-trait RestEndpoint extends Directives with Json4sSupport {
-  implicit val serialization = native.Serialization
-  implicit val formats = DefaultFormats ++ JavaTimeSerializers.all
-
-  def routes: Route
-}
 
 class PostEndpoint(postService: PostService) extends RestEndpoint {
 
@@ -49,7 +36,14 @@ class PostEndpoint(postService: PostService) extends RestEndpoint {
       }
     }
 
-  def retrievePostsByTags: Route = ???
+  def retrievePostsByTitle: Route =
+    (pathEndOrSingleSlash & get) {
+      parameter("title") { title =>
+        onSuccess(postService.retrievePostsByTitle(title)) { posts =>
+          complete(StatusCodes.OK, posts)
+        }
+      }
+    }
 
   def replacePost: Route =
     (path(Segment) & put & entity(as[CreateReplacePostData])) { (id, data) =>
@@ -59,19 +53,11 @@ class PostEndpoint(postService: PostService) extends RestEndpoint {
       }
     }
 
-  def updatePost: Route =
-    (path(Segment) & put & entity(as[UpdatePostData])) { (id, data) =>
-      onSuccess(postService.updatePost(id, data)) {
-        case Some(post) => complete(StatusCodes.OK, post)
-        case None       => complete(StatusCodes.NotFound)
-      }
-    }
-
   def deletePost: Route =
     (path(Segment) & delete) { postId =>
       onSuccess(postService.deletePost(postId)) {
-        case Some(_) => complete(StatusCodes.NoContent)
-        case _       => complete(StatusCodes.NotFound)
+        case Some(post) => complete(StatusCodes.OK, post)
+        case _          => complete(StatusCodes.NotFound)
       }
     }
 
@@ -80,9 +66,9 @@ class PostEndpoint(postService: PostService) extends RestEndpoint {
       createPost ~
       createSeveralPosts ~
       retrievePost ~
+      retrievePostsByTitle ~
       retrievePosts ~
-      retrievePostsByTags ~
-      updatePost ~
+      replacePost ~
       deletePost
     }
 
