@@ -1,34 +1,90 @@
 # FaunaDB Demo App
 
-This is a demo application which showcases how to create a simple CRUD REST service backed by FaunaDB. The examples presented in the [Getting Started](https://app.fauna.com/documentation/gettingstarted) have been used as starting point for implementing the service.
+This is a demo application which showcases how to create a simple CRUD REST service backed by FaunaDB. The examples presented in the [Getting Started](https://app.fauna.com/documentation/gettingstarted) and [CRUD](https://app.fauna.com/documentation/howto/crud) guides have been used as starting point for implementing the service.
 
 __Table of Contents__
 
 * [Prerequisites](#prerequisites)
 * [Running the app](#running-the-app)
 * [API Reference](#api-reference)
+ * [Create a Post](#create-a-post)
+ * [Create several Posts](#create-several-posts)
+ * [Retrieve a Post](#retrieve-a-post)
+ * [Retrieve Posts](#retrieve-posts)
+ * [Retrieve Posts by Tags](#retrieve-posts-by-tags)
+ * [Replace a Post](#replace-a-post)
+ * [Delete a Post](#delete-a-post)
 * [FQL Reference](#fql-reference)
+ * [Save a Post](#save-a-post)
+ * [Save several Posts](#save-several-posts)
+ * [Find a Post](#find-a-post)
+ * [Find all Posts](#find-all-posts)
+ * [Find Posts by Title](#find-posts-by-title)
 
 ## Prerequisites
 
-### Setup a Fauna Cloud account
+### 1. Setup a Fauna Cloud account
 Create a Fauna Cloud account filling the form [here](https://app.fauna.com/sign-up).
 
-### Set up Schema
 
-// TODO: add FQL shell script file for setting up the schema
+### 2. Install Fauna Shell
+Open a terminal and install the Fauna Shell.  If you are on a PC, you can use [npm](https://www.npmjs.com/get-npm):
 
-### Obtain an Admin API Key
+```
+$ npm install -g fauna-shell
+```
+
+Alternatively, if you are on a Mac, you can use [Homebrew](https://brew.sh/):
+
+```
+$ brew install fauna-shell
+```
+
+
+### 3. Create Database
+Once the Fauna Shell is installed, it’s time to login to your Fauna Cloud account from the shell. You can do that by typing the following command:
+
+```
+$ fauna cloud-login
+```
+
+It will prompt for your Fauna Cloud credentials, where you need to enter the email you used for signing up, and your password.
+
+```
+Email: email@example.com
+Password: **********
+```
+
+> Note: once you are logged in on a machine, the Fauna Shell will remember your credentials so you don’t need to log in again.
+
+The next step will be to create a database for storing the data. Issue the following command for creating a database called `demo-app`:
+
+
+```
+$ fauna create-database demo-app
+```
+
+
+### 4. Set up Schema
+
+Run below command for creating the DB schema. It will execute the all required queries from a file.
+
+```
+fauna run-queries demo-app --file=./scripts/create_schema.fql
+```
+
+### 5. Obtain an Admin API Key
 Create an Admin API key from the [Cloud Keys](https://app.fauna.com/keys) panel. The API key will be used for running the service.
 
 
 ## Runing the app
 
-For running the service, make sure to include the Admin API key created below as follows:
+For running the service, make sure to include the Admin API key created above as follows:
 
 ```
 sbt run -Dfauna-db.secret=your_api_key_goes_here
 ```
+
 The app will start by default at port `9000`.
 
 
