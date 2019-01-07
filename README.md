@@ -67,14 +67,14 @@ $ fauna create-database demo-app
 
 ### 4. Set up Schema
 
-Run below command for creating the DB schema. It will execute the all required queries from a file.
+Run below command for creating the DB schema. It will execute all required queries from a file.
 
 ```
 fauna run-queries demo-app --file=./scripts/create_schema.fql
 ```
 
-### 5. Obtain an Admin API Key
-Create an Admin API key from the [Cloud Keys](https://app.fauna.com/keys) panel. The API key will be used for running the service.
+### 5. Obtain an API Key for the DB
+Create an API Key for the created DB from the Cloud Dashboard [here] (https://dashboard.fauna.com/db/demo-app/keys). The API key will be used for running the service.
 
 
 ## Runing the app
