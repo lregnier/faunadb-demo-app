@@ -6,7 +6,7 @@ import services.PostService
 
 trait PersistenceModule {
   lazy val faunaSettings = new FaunaSettings(ConfigFactory.load())
-  lazy val faunaClient = FaunaClient(faunaSettings.apiKey)
+  lazy val faunaClient = FaunaClient(faunaSettings.secret, faunaSettings.endpoint)
 
   lazy val postRepository = new PostRepository(faunaClient)
 }

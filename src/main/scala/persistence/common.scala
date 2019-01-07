@@ -17,7 +17,6 @@ import scala.concurrent.Future
   *
   */
 trait Repository[A <: Entity] extends {
-
   def save(entity: A): Future[A]
   def saveAll(entities: A*): Future[Seq[A]]
   def remove(id: String): Future[Option[A]]

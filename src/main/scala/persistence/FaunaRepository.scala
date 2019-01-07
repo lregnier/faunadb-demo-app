@@ -126,7 +126,9 @@ object FaunaRepository {
   object Implicits extends Implicits
 }
 
+// Settings
 class FaunaSettings(config: Config) {
   private val faunaConfig = config.getConfig("fauna-db")
-  val apiKey = faunaConfig.getString("api-key")
+  val endpoint = faunaConfig.getString("endpoint")
+  val secret = faunaConfig.getString("secret")
 }
