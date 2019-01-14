@@ -328,7 +328,7 @@ Select(
       Obj("data" -> Obj("title" -> "My cat and other marvels")))
     )
     Create(
-      Class("posts"), 
+      Ref(Class("posts"), "1520225686617873"), 
       Obj("data" -> Obj("title" -> "My cat and other marvels"))))
     )
   )  
