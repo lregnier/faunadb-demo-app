@@ -341,7 +341,6 @@ Select(
 * [Select](https://app.fauna.com/documentation/reference/queryapi#select)
 * [If](https://app.fauna.com/documentation/reference/queryapi#if)
 * [Exists](https://app.fauna.com/documentation/reference/queryapi#exists)
-* [Let](https://app.fauna.com/documentation/reference/queryapi#let)
 
 ### Save several Posts
 It saves several Posts within a single transaction. It uses the `Map` function to iterate over a collection of entities and apply the above save query to them.
@@ -386,6 +385,14 @@ SelectAll(
   )
 )
 ```
+
+#### References:
+* [Paginate](https://app.fauna.com/documentation/reference/queryapi#paginate)
+* [Match](https://app.fauna.com/documentation/reference/queryapi#matchindexref-terms)
+* [SelectAll](https://app.fauna.com/documentation/reference/queryapi#selectall)
+* [Map](https://app.fauna.com/documentation/reference/queryapi#map)
+* [Lambda](https://app.fauna.com/documentation/reference/queryapi#lambda)
+* [Get](https://app.fauna.com/documentation/reference/queryapi#get)
 
 ### Find Posts by Title
 It looks up all Posts matching the given Title and returns its data. The search is done using a previsouly created `Index`.  First, all Posts Ids are found using the `Index` together with the `Paginate` function and then its data is looked up through the `Get` function.
