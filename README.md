@@ -335,8 +335,6 @@ Select(
 )
 ```
 
-> NOTE: Id is also stored in the data section so that `faunadb.values.Codec` can be used to transform from/into Fauna objects and case classes.
-
 #### References:
 * [Create](https://app.fauna.com/documentation/reference/queryapi#create)
 * [Replace](https://app.fauna.com/documentation/reference/queryapi#replace)
@@ -385,8 +383,8 @@ SelectAll(
     Paginate(Match(Index("all_posts"))),
     Lambda( nextRef => 
       Select("data", Get(nextRef)))
- 	)
- )
+  )
+)
 ```
 
 ### Find Posts by Title
@@ -399,8 +397,8 @@ SelectAll(
     Paginate(Match(Index(posts_by_title)), "My cat and other marvels"),
     Lambda( nextRef => 
       Select("data", Get(nextRef)))
- 	)
- )
+  )
+)
 ```
 
 #### References:
