@@ -23,16 +23,42 @@ trait FaunaRepository[A <: Entity] extends Repository[A] with FaunaRepository.Im
 
   implicit protected val codec: Codec[A]
 
+  def nextId(): Future[String] = {
+    val result: Future[Value] = client.query(
+      NewId()
+    )
+
+    result.decode[String]
+  }
+
+  def nextIds(size: Int): Future[Seq[String]] = {
+    val indexes = (1 to size).toList
+
+    val result: Future[Value] = client.query(
+      Map(
+        indexes,
+        Lambda(_ => NewId())
+      )
+    )
+
+    result.decode[Seq[String]]
+  }
+
   override def save(entity: A): Future[A] = {
-    val result: Future[Value] = client.query(saveQuery(entity.id, entity))
-    result.decode
+    val result: Future[Value] = client.query(
+      saveQuery(entity.id, entity)
+    )
+    result.decode[A]
   }
 
   override def saveAll(entities: A*): Future[Seq[A]] = {
     val result: Future[Value] = client.query(
       Map(
         entities,
-        Lambda(nextEntity => saveQuery(Select(Value("id"), nextEntity), nextEntity))
+        Lambda { nextEntity =>
+          val id = Select("id", nextEntity)
+          saveQuery(id, nextEntity)
+        }
       )
     )
 
@@ -42,67 +68,45 @@ trait FaunaRepository[A <: Entity] extends Repository[A] with FaunaRepository.Im
   override def remove(id: String): Future[Option[A]] = {
     val result: Future[Value] = client.query(
       Select(
-        Value("data"),
-        Delete(Ref(Class(className), Value(id)))
+        "data",
+        Delete(Ref(Class(className), id))
       )
     )
 
-    result.optDecode
+    result.optDecode[A]
   }
 
   override def find(id: String): Future[Option[A]] = {
-    val result: Future[Value] =
-      client.query(
-        Select(Value("data"), Get(Ref(Class(className), Value(id))))
-      )
+    val result: Future[Value] = client.query(
+      Select("data", Get(Ref(Class(className), id)))
+    )
 
-    result.optDecode
+    result.optDecode[A]
   }
 
   def findAll(): Future[Seq[A]] = {
-    val result: Future[Value] =
-      client.query(
+    val result: Future[Value] = client.query(
+      SelectAll(
+        "data",
         Map(
-          SelectAll(
-            Path("data", "id"),
-            Paginate(
-              Match(Index(Value(classIndexName)))
-            )
-          ),
-          Lambda(nextId => Select(Value("data"), Get(Ref(Class(className), nextId))))
+          Paginate(Match(Index(classIndexName))),
+          Lambda(nextRef => Select("data", Get(nextRef)))
         )
       )
+    )
 
     result.decode[Seq[A]]
   }
 
   protected def saveQuery(id: Expr, data: Expr): Expr =
     Select(
-      Value("data"),
+      "data",
       If(
         Exists(Ref(Class(className), id)),
-        replaceQuery(id, data),
-        createQuery(data)
+        Replace(Ref(Class(className), id), Obj("data" -> data)),
+        Create(Ref(Class(className), id), Obj("data" -> data))
       )
     )
-
-  protected def createQuery(data: Expr): Expr =
-    Let(
-      Seq(
-        "id" ->
-          Select(
-            Path("ref", "id"),
-            Create(Class(Value(className)), Obj("data" -> data))
-          )
-      ),
-      Update(
-        Ref(Class(className), Var("id")),
-        Obj("data" -> Obj("id" -> Var("id")))
-      )
-    )
-
-  protected def replaceQuery(id: Expr, data: Expr): Expr =
-    Replace(Ref(Class(className), id), Obj("data" -> data))
 
 }
 

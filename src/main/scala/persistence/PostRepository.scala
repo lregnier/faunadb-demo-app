@@ -18,14 +18,12 @@ class PostRepository(faunaClient: FaunaClient) extends FaunaRepository[Post] {
   def findByTitle(title: String): Future[Seq[Post]] = {
     val result: Future[Value] =
       client.query(
-        Map(
-          SelectAll(
-            Path("data", "id"),
-            Paginate(
-              Match(Index("posts_by_title"), title)
-            )
-          ),
-          Lambda(nextId => Select(Value("data"), Get(Ref(Class(className), nextId))))
+        SelectAll(
+          "data",
+          Map(
+            Paginate(Match(Index("posts_by_title"), title)),
+            Lambda(nextRef => Select("data", Get(nextRef)))
+          )
         )
       )
 

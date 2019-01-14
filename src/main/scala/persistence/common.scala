@@ -16,10 +16,20 @@ import scala.concurrent.Future
   * the scenes to manage its persistence.
   *
   */
-trait Repository[A <: Entity] extends {
+trait Repository[A <: Entity] extends IdentityFactory {
   def save(entity: A): Future[A]
   def saveAll(entities: A*): Future[Seq[A]]
   def remove(id: String): Future[Option[A]]
   def find(id: String): Future[Option[A]]
   def findAll(): Future[Seq[A]]
+}
+
+/**
+  * Base trait for implementing an Identity factory. It enables
+  * support for early Identity generation and assignment
+  * (i.e. before the Entity is saved into the Repository).
+  */
+trait IdentityFactory {
+  def nextId(): Future[String]
+  def nextIds(size: Int): Future[Seq[String]]
 }

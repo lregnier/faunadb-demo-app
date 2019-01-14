@@ -8,31 +8,33 @@ import scala.concurrent.Future
 class PostService(repository: PostRepository) extends Service {
 
   def createPost(data: CreateReplacePostData): Future[Post] = {
-    // Build entity
-    val postEntity =
-      Post(
-        "-1", // Id will be automatically assigned by the Repository once saved
-        data.title,
-        data.tags
-      )
-
     // Save
-    repository.save(postEntity)
+    val result: Future[Post] =
+      for {
+        id <- repository.nextId()
+        post <- repository.save(Post(id, data.title, data.tags))
+      } yield post
+
+    result
   }
 
   def createSeveralPosts(createUpdateData: Seq[CreateReplacePostData]): Future[Seq[Post]] = {
-    // Build entities
-    val postEntities =
-      createUpdateData.map { data =>
-        Post(
-          "-1", // Id will be automatically assigned by the Repository once saved
-          data.title,
-          data.tags
-        )
+    def buildEntities(ids: Seq[String]): Future[Seq[Post]] = Future.successful {
+      (ids zip createUpdateData) map {
+        case (id, data) =>
+          Post(id, data.title, data.tags)
       }
+    }
 
     // Save
-    repository.saveAll(postEntities: _*)
+    val result: Future[Seq[Post]] =
+      for {
+        ids <- repository.nextIds(createUpdateData.size)
+        entities <- buildEntities(ids)
+        result <- repository.saveAll(entities: _*)
+      } yield result
+
+    result
   }
 
   def retrievePost(id: String): Future[Option[Post]] =
@@ -45,15 +47,15 @@ class PostService(repository: PostRepository) extends Service {
     repository.findByTitle(title)
 
   def replacePost(id: String, data: CreateReplacePostData): Future[Option[Post]] = {
-    def replace(post: Post): Future[Post] = {
+    def replace(): Future[Post] = {
       val postEntity = Post(id, data.title, data.tags)
       repository.save(postEntity)
     }
 
-    val result =
+    val result: Future[Option[Post]] =
       retrievePost(id) flatMap {
-        case Some(post) => replace(post).map(Some(_))
-        case None       => Future.successful(None)
+        case Some(_) => replace().map(Some(_))
+        case None    => Future.successful(None)
       }
 
     result
