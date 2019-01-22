@@ -42,7 +42,7 @@ $ brew install fauna-shell
 
 
 ### 3. Create Database
-Once the Fauna Shell is installed, it’s time to login to your Fauna Cloud account from the shell. You can do that by typing the following command:
+Next, create a new database to which the application will connect to for storing the data. For doing so, login to your Fauna Cloud account from the Fauna Shell by typing the following command:
 
 ```
 $ fauna cloud-login
@@ -57,7 +57,7 @@ Password: **********
 
 > Note: once you are logged in on a machine, the Fauna Shell will remember your credentials so you don’t need to log in again.
 
-The next step will be to create a database for storing the data. Issue the following command for creating a database called `demo-app`:
+The next step will be to create the database. Issue the following command for creating a database called `demo-app`:
 
 
 ```
@@ -70,19 +70,28 @@ $ fauna create-database demo-app
 Run below command for creating the DB schema. It will execute all required queries from a file.
 
 ```
-fauna run-queries demo-app --file=./scripts/create_schema.fql
+$ fauna run-queries demo-app --file=./scripts/create_schema.fql
 ```
 
-### 5. Obtain an API Key for the DB
-Create an API Key for the created DB from the Cloud Dashboard [here](https://dashboard.fauna.com/db/demo-app/keys). The API key will be used for running the service.
+### 5. Obtain an API Key
+Next, issue an API Key for connecting to the new created DB from the service. Execute below command for doing so:
 
+```
+$ fauna create-key demo-app server
+```
+
+Make sure to write down the given secret key. It will be used for starting up the service later on.
+
+> Alternatively, you can also create an API Key from the Cloud Dashboard [here](https://dashboard.fauna.com/db/demo-app/keys).
 
 ## Running the app
 
-For running the service, make sure to include the Admin API key created above as follows:
+For starting up the service you can use all `sbt` standard commands. If you don't have `sbt` installed, follow instructions [here](https://www.scala-sbt.org/download.html).
+
+Before runnning the service, make sure to include the API key created above as follows:
 
 ```
-sbt run -Dfauna-db.secret=your_api_key_goes_here
+$ sbt run -Dfauna-db.secret=your_api_key_goes_here
 ```
 
 The app will start by default at port `9000`.
