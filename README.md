@@ -117,7 +117,7 @@ Content-type: application/json
 
 ```
 
-##### curl
+##### curl example
 
 ```
 curl -XPOST -H "Content-type: application/json" -d '{
@@ -158,7 +158,7 @@ Content-type: application/json
 ]
 ```
 
-##### curl
+##### curl example
 ```
 curl -XPOST -H "Content-type: application/json" -d '[
   {"title": "My cat and other marvels", "tags": ["pet", "cute"]},
@@ -203,7 +203,7 @@ Retrieves an existent Post for the given Id. If the Post cannot be found, a `404
 GET /posts/{post_id}
 ```
 
-##### curl
+##### curl example
 ```
 curl -XGET 'http://localhost:9000/posts/219871526709625348'
 ```
@@ -232,7 +232,7 @@ Retrieves all existent Posts.
 GET /posts
 ```
 
-##### curl
+##### curl example
 ```
 curl -XGET 'http://localhost:9000/posts'
 ```
@@ -285,7 +285,7 @@ Content-type: application/json
   }
 ]
 ```
-##### curl
+##### curl example
 
 ```
 curl -XGET 'http://localhost:9000/posts?title=My%20cat%20and%20other%20marvels'
@@ -307,7 +307,7 @@ Content-type: application/json
 }
 ```
 
-##### curl
+##### curl example
 
 ```
 curl -XPUT -H "Content-type: application/json" -d '{
