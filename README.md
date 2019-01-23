@@ -120,7 +120,7 @@ Content-type: application/json
 ##### curl example
 
 ```
-curl -XPOST -H "Content-type: application/json" -d '{
+$ curl -XPOST -H "Content-type: application/json" -d '{
   "title": "My cat and other marvels",
   "tags": ["pet", "cute"]
 }' 'http://localhost:9000/posts'
@@ -160,7 +160,7 @@ Content-type: application/json
 
 ##### curl example
 ```
-curl -XPOST -H "Content-type: application/json" -d '[
+$ curl -XPOST -H "Content-type: application/json" -d '[
   {"title": "My cat and other marvels", "tags": ["pet", "cute"]},
   {"title": "Pondering during a commute", "tags": ["commuting"]},
   {"title": "Deep meanings in a latte", "tags": ["coffee"]}
@@ -205,7 +205,7 @@ GET /posts/{post_id}
 
 ##### curl example
 ```
-curl -XGET 'http://localhost:9000/posts/219871526709625348'
+$ curl -XGET 'http://localhost:9000/posts/219871526709625348'
 ```
 
 #### Response
@@ -234,7 +234,7 @@ GET /posts
 
 ##### curl example
 ```
-curl -XGET 'http://localhost:9000/posts'
+$ curl -XGET 'http://localhost:9000/posts'
 ```
 
 #### Response
@@ -288,7 +288,7 @@ Content-type: application/json
 ##### curl example
 
 ```
-curl -XGET 'http://localhost:9000/posts?title=My%20cat%20and%20other%20marvels'
+$ curl -XGET 'http://localhost:9000/posts?title=My%20cat%20and%20other%20marvels'
 ```
 
 ### Replace a Post
@@ -310,7 +310,7 @@ Content-type: application/json
 ##### curl example
 
 ```
-curl -XPUT -H "Content-type: application/json" -d '{
+$ curl -XPUT -H "Content-type: application/json" -d '{
   "title": "My dog and other marvels"
 }' 'http://localhost:9000/posts/219871526709625348'
 ```
@@ -345,7 +345,7 @@ DELETE /posts/{post_id}
 ##### curl
 
 ```
-curl -XDELETE 'http://localhost:9000/posts/219871526709625348'
+$ curl -XDELETE 'http://localhost:9000/posts/219871526709625348'
 ```
 
 #### Response
